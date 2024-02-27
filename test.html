@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Capture</title>
+</head>
+<body>
+
+<video id="videoPreview" autoplay></video>
+<canvas id="canvas" style="display: none;"></canvas>
+<input type="hidden" id="imageData">
+<button id="savePicture" style="display: none;">Save Picture</button>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var videoPreview = document.getElementById('videoPreview');
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        var stream;
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (mediaStream) {
+                stream = mediaStream;
+                videoPreview.srcObject = mediaStream;
+                videoPreview.play();
+                // showVideo();  // Assuming this function is defined elsewhere in your code
+            })
+            .catch(function (error) {
+                console.error('Error accessing camera:', error);
+            });
+
+        videoPreview.addEventListener('loadedmetadata', function () {
+            canvas.width = videoPreview.videoWidth;
+            canvas.height = videoPreview.videoHeight;
+
+            // Uncomment one of the following approaches based on your requirement:
+
+            // Approach 1: Draw the entire video frame without distortion
+            // context.drawImage(videoPreview, 0, 0, videoPreview.videoWidth, videoPreview.videoHeight);
+
+            // Approach 2: Resize the image proportionally
+            // const targetWidth = 160;  // Adjust this to your desired width
+            // const targetHeight = (targetWidth / videoPreview.videoWidth) * videoPreview.videoHeight;
+            // context.drawImage(videoPreview, 0, 0, targetWidth, targetHeight);
+
+            var imageData = canvas.toDataURL('image/jpeg', 0.5);
+            // showCanvas();  // Assuming this function is defined elsewhere in your code
+            $("#imageData").val(imageData);
+            $("#savePicture").show();
+        });
+
+        // Add error handling for the video element
+        videoPreview.addEventListener('error', function (e) {
+            console.error('Error loading video:', e);
+        });
+
+        // Cleanup stream when done
+        $("#savePicture").on('click', function () {
+            stream.getTracks().forEach(track => track.stop());
+        });
+    });
+</script>
+
+</body>
+</html>
